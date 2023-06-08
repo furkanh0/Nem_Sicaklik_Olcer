@@ -1,0 +1,48 @@
+#include <SimpleDHT.h>    // Kütüphaneyi ekler.
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
+LiquidCrystal_I2C lcdekranim(0x27,16,2);
+int sensor = 2;    // Sensör "DATA" pinimizi tanımlayıp belirliyoruz.
+SimpleDHT22 dht22; // Kütüphane fonksiyonlarını tanımlar.
+
+void setup() {
+  
+ Serial.begin(115200); // 115200 baud rate'de seri haberleşmeyi başlatır.
+ lcdekranim.init();
+ lcdekranim.backlight();
+}
+
+void loop() {
+  
+  float nem = 0;        // Nem ve sıcaklık değerleri için ayrı değişkenler tanımlıyoruz.
+  float sicaklik = 0;
+  
+  int hata = SimpleDHTErrSuccess;
+  
+  if ((hata = dht22.read2(sensor, &sicaklik, &nem, NULL)) != SimpleDHTErrSuccess) {  // Sensör okumada hata olduğunda
+    Serial.print("DHT22 sensörünü okurken bir hata meydana geldi");                  // hata nedenini ekrana yansıtır
+    Serial.println(hata);                                                            // ve 5 sn içinde işlemi sonlandırır.
+    delay(1000);
+    return;
+  }
+
+
+  Serial.print("(%) Bağıl Nem: "); // Okunan nem değerini ekrana yansıtır.
+  Serial.println((float)nem,1);    
+       
+  Serial.print("(C) Sıcaklık: ");  // Okunan sıcaklık değerini ekrana yansıtır.
+  Serial.println((float)sicaklik,1);    
+  Serial.println();
+
+  lcdekranim.setCursor(0,0);
+  lcdekranim.print("Bagil Nem:");
+  lcdekranim.setCursor(12,0);
+  lcdekranim.print((float)nem,1);
+  lcdekranim.setCursor(0,1);
+  lcdekranim.print("Sicaklik:");
+  lcdekranim.setCursor(12,1);
+  lcdekranim.print((float)sicaklik,1);
+
+  delay(1000);                      // Okumalar arası 5 saniye ara.
+  
+}
